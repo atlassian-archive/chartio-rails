@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'optparse'
+require 'yaml'
+begin
+  require 'chartio-rails'
+rescue LoadError
+  lib = File.expand_path('../../lib', __FILE__)
+  $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+  require File.expand_path("../../lib/chartio-rails", __FILE__)
+end
+
+options = {}
+options_parser = OptionParser.new do |opts|
+  opts.banner = <<-TXT
+A helper function to build foreign key constraints in Chartio
+
+Usage: relateiq_dump [options]
+TXT
+
+end

@@ -8,27 +8,32 @@ module Chartio
       :parent_table,
       :parent_primary_key,
       :child_table,
-      :child_foreign_key
-    )
+      :child_foreign_key,
+      :polymorphic_field
+    ) do
 
-    attr_accessor :models, :formatter, :logger
+      def to_h
+        {
+          parent_table: self.parent_table,
+          parent_primary_key: self.parent_primary_key,
+          child_table: self.child_table,
+          child_foreign_key: self.child_foreign_key,
+          polymorphic_field: self.polymorphic_field
+        }
+      end
+    end
 
-    def initialize(formatter, logger = STOUT)
-      @models    = []
+    attr_accessor :formatter, :logger
+
+    def initialize(formatter, logger = STDOUT)
       @formatter = formatter
       @logger    = logger
     end
 
-    # TODO Polymorphic Associations
-    # TODO Single Table Inheritance
-    # TODO Has and Belongs To Many
-    # TODO Need to create the ability to change how CSV and logs are written
     def output_report
-      Rails.application.eager_load!
-
-      find_relationships.each do |record|
+      find_relationships do |record|
         begin
-          @formatter.write_foreign_key(record)
+          @formatter << record
         rescue => e
           logger.puts "Encountered an error"
           logger.puts e.message
@@ -42,50 +47,45 @@ module Chartio
     private
 
     def find_relationships
-      @models = ActiveRecord::Base.decendants
-      @models.each do |model|
+      models = ActiveRecord::Base.descendants
+      models.each do |model|
         model.reflections.each do |assoc, assoc_reflect|
           relationship = case assoc_reflect.macro
+            when :has_many
+              has_many(model, assoc_reflect)
             when :belongs_to
-              belongs_to(assoc, assoc_reflect)
-            when :has_and_belongs_to_many
-              has_and_belongs_to_many(assoc, assoc_reflect)
-            when :has_one
-              has_one(assoc, assoc_reflect)
+              belongs_to(model, assoc_reflect)
+            else
+              nil
           end
           yield(relationship) if relationship
-
-          #if assoc_reflect.macro == :belongs_to
-            #relationship = ForeignKeyRelationship.new(
-            #)
-            #yield(relationship)
-            #yield([
-              #"#{model.table_name_prefix}#{model.table_name}#{model.table_name_suffix}",
-              #assoc_reflect.foreign_key,
-              #assoc_reflect.table_name,
-              #assoc_reflect.association_primary_key
-            #])
-          #end
         end
       end
     end
 
-    def belongs_to(association, association_reflection)
-      ForeignKeyRelationship.new(
-
-      )
+    def has_many(model, association_reflection)
+      # Were checking for polymorphic associations
+      if association_reflection.options[:as]
+        ForeignKeyRelationship.new(
+          model.table_name,
+          model.primary_key,
+          association_reflection.table_name,
+          association_reflection.foreign_key,
+          association_reflection.type
+        )
+      end
     end
 
-    def has_and_belongs_to_many(association, association_reflection)
-      ForeignKeyRelationship.new(
-
-      )
-    end
-
-    def has_one(association, association_reflection)
-      ForeignKeyRelationship.new(
-
-      )
+    def belongs_to(model, association_reflection)
+      if !association_reflection.options[:polymorphic] &&
+      !(model.name.include?("HABTM_") && association_reflection.name == :left_side)
+        ForeignKeyRelationship.new(
+          association_reflection.table_name,
+          model.primary_key,
+          model.table_name,
+          association_reflection.foreign_key
+        )
+      end
     end
 
   end

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'chartio/test_formatter'
 
 describe "Chartio Rails" do
 
@@ -39,6 +38,41 @@ describe "Chartio Rails" do
         :child_table => 'assemblies_parts',
         :child_foreign_key => 'assembly_id',
         :polymorphic_field => nil
+      }
+    ])
+  end
+
+  it "should output a polymorphic assocation" do
+    fks = @test_formatter.find_keys(:polymorphic_field => 'imageable_type')
+    expect(fks.length).to eq(2)
+    expect(fks.map(&:to_h)).to match_array([
+      {
+        parent_table: 'employees',
+        parent_primary_key: 'id',
+        child_table: 'pictures',
+        child_foreign_key: 'imageable_id',
+        polymorphic_field: 'imageable_type'
+      },
+      {
+        parent_table: 'products',
+        parent_primary_key: 'id',
+        child_table: 'pictures',
+        child_foreign_key: 'imageable_id',
+        polymorphic_field: 'imageable_type'
+      }
+    ])
+  end
+
+  it "should handle belongs_to overrides" do
+    fks = @test_formatter.find_keys(:child_table => 'orders', :child_foreign_key => 'user_id')
+    expect(fks.length).to eq(1)
+    expect(fks.map(&:to_h)).to match_array([
+      {
+        parent_table: 'users',
+        parent_primary_key: 'id',
+        child_table: 'orders',
+        child_foreign_key: 'user_id',
+        polymorphic_field: nil
       }
     ])
   end

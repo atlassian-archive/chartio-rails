@@ -2,6 +2,7 @@ require 'rubygems'
 require 'bundler/setup'
 Bundler.require(:default)
 require 'pry'
+require 'chartio/test_formatter'
 
 lib = File.expand_path('../spec', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)

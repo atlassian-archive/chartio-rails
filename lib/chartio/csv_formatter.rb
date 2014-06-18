@@ -15,14 +15,14 @@ module Chartio
       @foreign_keys << incoming_foreign_key
     end
 
-    def output_reoprt
-      @csv << [
-        "primary_key_table",
-        "primary_key_column",
-        "foreign_key_table",
-        "foreign_key_column",
-        "polymorphic_type"
-      ]
+    def output_report
+      @csv << Chartio::ForeignKeyRelationship::FIELDS.map(&:to_s)
+
+      @foreign_keys.each do |key|
+        @csv << key.to_a
+      end
+
+      @csv.string
     end
 
   end

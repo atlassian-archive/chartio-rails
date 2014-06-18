@@ -33,7 +33,7 @@ ActiveRecord::Schema.define do
   create_table :assemblies do |t|
   end
 
-  create_table :assemblies_parts do |t|
+  create_table :assemblies_parts, :id => false do |t|
     t.integer :assembly_id
     t.integer :part_id
   end

@@ -2,6 +2,18 @@
 
 As a Rails user you're probably familiar with the fact that Rails doesn't not create foreign keys in the database. Since ActiveRecord migrations don't cover this, it makes it very hard to work with Chartio because the metadata around how tables should be joined together only lives at the application layer. Using this gem, you will be able to output the metadata around the relationships in your Rails project and, working with your Chartio Customer Success Engineer, can get the relationships you need for your database.
 
+## Supported Version
+
+### Ruby
+
+* 1.9.3
+* 2.0.0
+* 2.1.0
+
+### ActiveRecord
+
+* >= 3.0.0
+
 ## Installation
 
 Add this line to your application's Gemfile:

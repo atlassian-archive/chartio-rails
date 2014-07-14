@@ -3,7 +3,7 @@ module Chartio
     railtie_name :chartio
 
     rake_tasks do
-      load "tasks/chartio.rake"
+      load "chartio/tasks/chartio.rake"
     end
 
     config.to_prepare do
